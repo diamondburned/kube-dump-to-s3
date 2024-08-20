@@ -57,12 +57,18 @@
 
           kube-dump-to-s3 =
             with python.pkgs;
-            toPythonApplication (buildPythonPackage {
+            buildPythonApplication rec {
               name = "kube-dump-to-s3";
               src = ./.;
-              propagatedBuildInputs = pythonPkgs;
               format = "pyproject";
-            });
+
+              propagatedBuildInputs = pythonPkgs;
+
+              runtimeDeps = [ self.packages.${system}.kube-dump ];
+              preFixup = ''
+                makeWrapperArgs+=( --prefix PATH : ${lib.makeBinPath runtimeDeps} )
+              '';
+            };
 
           kube-dump = pkgs.writeShellApplication {
             name = "kube-dump";
