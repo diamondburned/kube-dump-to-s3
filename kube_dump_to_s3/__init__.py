@@ -1,9 +1,10 @@
-import logging
 from .config import Config, Secrets
-from . import kube_dump
+from . import kube_dump, zstd
 
 import boto3
 import tempfile
+import logging
+import glob
 
 
 def main():
@@ -32,9 +33,23 @@ def run(
                 kube_config=config.kubeconfig,
                 destination_dir=tmpdir,
                 output_by_type=True,
-                detailed=True,
+                archivate=True,
+                archive_type="tar",
             ),
         )
+
+        # kube-dump doesn't give deterministic filenames, so we'll have to
+        # search for one.
+        dumps = glob.glob(f"{tmpdir}/dump_*.tar", recursive=False)
+        assert len(dumps) == 1, dumps
+
+        dump_tarball = dumps[0]
+        logger.debug(f"Dumped to {dump_tarball}")
+
+        if config.use_zstd:
+            zstd.run([dump_tarball])
+            dump_tarball += ".zst"
+            logger.debug(f"Compressed to {dump_tarball}")
 
         s3 = boto3.client(
             "s3",

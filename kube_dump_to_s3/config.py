@@ -35,6 +35,11 @@ class Config(BaseSettings):
         description="Debug mode (logging + keep export dir)",
     )
 
+    use_zstd: bool = Field(
+        default=True,
+        description="Compress the final tarball with zstd (otherwise, tar will be used)",
+    )
+
     kubeconfig: str = Field(description="Path to the kubeconfig file")
 
     s3_prefix: str = Field(default="kube-dump", description="Prefix for the S3 keys")

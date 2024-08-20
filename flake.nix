@@ -64,7 +64,14 @@
 
               propagatedBuildInputs = pythonPkgs;
 
-              runtimeDeps = [ self.packages.${system}.kube-dump ];
+              runtimeDeps =
+                with pkgs;
+                with self.packages.${system};
+                [
+                  kube-dump
+                  zstd
+                ];
+
               preFixup = ''
                 makeWrapperArgs+=( --prefix PATH : ${lib.makeBinPath runtimeDeps} )
               '';
