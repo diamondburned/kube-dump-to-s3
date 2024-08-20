@@ -15,5 +15,8 @@ dependencies = [
   "mypy-boto3-s3"
 ]
 
+[tool.setuptools]
+packages = ["kube_dump_to_s3"]
+
 [project.scripts]
 kube-dump-to-s3 = "kube_dump_to_s3:main"

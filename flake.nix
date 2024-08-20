@@ -40,6 +40,7 @@
             with pkgs;
             with self.packages.${system};
             [
+              just
               nixfmt-rfc-style
 
               pyright
@@ -48,7 +49,6 @@
 
               podman
               docker
-
               kube-dump
             ];
         };
@@ -76,6 +76,8 @@
               preFixup = ''
                 makeWrapperArgs+=( --prefix PATH : ${lib.makeBinPath runtimeDeps} )
               '';
+
+              meta.mainProgram = "kube-dump-to-s3";
             };
 
           kube-dump = pkgs.writeShellApplication {
