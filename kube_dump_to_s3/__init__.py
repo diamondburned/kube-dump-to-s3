@@ -2,18 +2,17 @@ from .config import Config, Secrets
 from . import kube_dump, zstd
 
 import boto3
+import coloredlogs
 import tempfile
 import datetime
 import logging
 import glob
 import sys
-import os
 
 
 def main() -> None:
     config = Config()  # pyright: ignore
-    if config.debug:
-        logging.basicConfig(level=logging.DEBUG)
+    coloredlogs.install(level="DEBUG" if config.debug else "INFO")
 
     try:
         run(config)

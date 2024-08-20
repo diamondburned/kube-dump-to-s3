@@ -28,6 +28,7 @@
           setuptools
           pydantic
           pydantic-settings
+          coloredlogs
           boto3
           boto3-stubs
           mypy-boto3-s3
