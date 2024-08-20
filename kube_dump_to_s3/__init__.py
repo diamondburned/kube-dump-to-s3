@@ -29,6 +29,7 @@ def run(
         kube_dump.run(
             dump=kube_dump.Dump.ALL,
             flags=kube_dump.Flags(
+                kube_config=config.kubeconfig,
                 destination_dir=tmpdir,
                 output_by_type=True,
                 detailed=True,
