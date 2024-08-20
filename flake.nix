@@ -53,6 +53,8 @@
         };
 
         packages = rec {
+          default = kube-dump-to-s3;
+
           kube-dump-to-s3 =
             with python.pkgs;
             toPythonApplication (buildPythonPackage {
