@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kube_dump_to_s3"
+version = "0.0.1"
+requires-python = ">=3.9"
+dependencies = [
+  "pydantic",
+  "pydantic-settings",
+  "boto3",
+  "boto3-stubs",
+  "mypy-boto3-s3"
+]
+
+[project.scripts]
+kube-dump-to-s3 = "kube_dump_to_s3:main"
