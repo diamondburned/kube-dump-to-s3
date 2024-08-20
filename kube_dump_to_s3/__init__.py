@@ -6,6 +6,14 @@ import boto3
 import tempfile
 
 
+def main():
+    config = Config()  # pyright: ignore
+    if config.debug:
+        logging.basicConfig(level=logging.DEBUG)
+
+    run(config)
+
+
 def run(
     config: Config,  # pyright: ignore
     secrets: Secrets | None = None,  # pyright: ignore
