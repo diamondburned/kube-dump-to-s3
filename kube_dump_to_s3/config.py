@@ -1,3 +1,4 @@
+from typing import Literal
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -22,13 +23,11 @@ class Secrets(BaseSettings):
 
 
 class Config(BaseSettings):
-    # model_config = SettingsConfigDict(
-    #     cli_prog_name="kube-dump-to-s3",
-    #     cli_parse_args=True,
-    #     cli_avoid_json=True,
-    #     json_file=["config.json"],
-    #     yaml_file=["config.yaml", "config.yml"],
-    # )
+    model_config = SettingsConfigDict(
+        cli_prog_name="kube-dump-to-s3",
+        cli_parse_args=True,
+        cli_avoid_json=True,
+    )
 
     debug: bool = Field(
         default=False,
@@ -41,6 +40,14 @@ class Config(BaseSettings):
     )
 
     kubeconfig: str = Field(description="Path to the kubeconfig file")
+    namespaces: list[str] | None = Field(
+        default=None,
+        description="List of namespaces to dump (none = all namespaces)",
+    )
+    cluster: bool = Field(
+        default=True,
+        description="Include cluster-wide resources",
+    )
 
     s3_prefix: str = Field(default="kube-dump", description="Prefix for the S3 keys")
     s3_bucket: str = Field(description="S3 bucket name")

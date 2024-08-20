@@ -14,6 +14,9 @@ class Flags(BaseModel):
     output_by_type: bool = False
     flat: bool = False
 
+    namespaces: str | None = None
+    namespaced_resources: str | None = None
+    cluster_resources: str | None = None
     kube_config: str | None = None
     kube_context: str | None = None
     kube_cluster: str | None = None
