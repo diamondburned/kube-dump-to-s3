@@ -4,6 +4,9 @@ on:
   push:
   pull_request:
 
+env:
+  IMAGE_TAG: ci
+
 jobs:
   build-with-docker:
     name: Build image with Docker
@@ -16,7 +19,7 @@ jobs:
 
       - name: Test run the Docker image
         run: |
-          docker run kube-dump-to-s3 -h | grep '^usage: kube-dump-to-s3'
+          docker run kube-dump-to-s3:ci -h | grep '^usage: kube-dump-to-s3'
 
   build-with-nix:
     name: Build image with Nix
@@ -32,4 +35,4 @@ jobs:
 
       - name: Test run the Docker image
         run: |
-          docker run kube-dump-to-s3 -h | grep '^usage: kube-dump-to-s3'
+          docker run kube-dump-to-s3:ci -h | grep '^usage: kube-dump-to-s3'
