@@ -1,0 +1,35 @@
+name: Docker Build Testing
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-with-docker:
+    name: Build image with Docker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: make docker-build-with-docker
+
+      - name: Test run the Docker image
+        run: |
+          docker run kube-dump-to-s3 -h | grep '^usage: kube-dump-to-s3'
+
+  build-with-nix:
+    name: Build image with Nix
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: DeterminateSystems/nix-installer-action@main
+      - uses: DeterminateSystems/magic-nix-cache-action@main
+
+      - name: Build Docker image
+        run: make docker-build-with-nix
+
+      - name: Test run the Docker image
+        run: |
+          docker run kube-dump-to-s3 -h | grep '^usage: kube-dump-to-s3'
