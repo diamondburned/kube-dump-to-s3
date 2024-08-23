@@ -4,9 +4,6 @@ on:
   push:
   pull_request:
 
-env:
-  IMAGE_TAG: ci
-
 jobs:
   build-with-docker:
     name: Build image with Docker
@@ -15,7 +12,10 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build Docker image
-        run: make docker-build-with-docker
+        run: |
+          make docker-build-with-docker
+        env:
+          IMAGE_TAG: ci
 
       - name: Test run the Docker image
         run: |
@@ -30,8 +30,29 @@ jobs:
       - uses: DeterminateSystems/nix-installer-action@main
 
       - name: Build Docker image
-        run: make docker-build-with-nix
+        run: |
+          make docker-build-with-nix
+        env:
+          IMAGE_TAG: ci
 
       - name: Test run the Docker image
         run: |
           docker run kube-dump-to-s3:ci -h | grep '^usage: kube-dump-to-s3'
+
+  publish:
+    name: Publish image to GitHub Container Registry
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: DeterminateSystems/nix-installer-action@main
+      - name: Build Docker image
+        run: |
+          make docker-push
+
+      - name: Push Docker image
+        run: |
+          make docker-push
+        env:
+          IMAGE_REPOSITORY: ghcr.io/diamondburned
