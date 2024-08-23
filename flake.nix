@@ -88,7 +88,6 @@
               curl
               jq
               yq-go
-              git
               xz
               gzip
               bzip2
