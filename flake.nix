@@ -86,6 +86,7 @@
             runtimeInputs = with pkgs; [
               coreutils
               kubectl
+              getopt
               curl
               jq
               yq-go
