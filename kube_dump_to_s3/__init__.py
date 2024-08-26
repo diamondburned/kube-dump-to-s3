@@ -1,5 +1,5 @@
 from .config import Config, Secrets
-from . import kube_dump, zstd
+from . import kube_dump, tar
 
 import boto3
 import coloredlogs
@@ -8,6 +8,7 @@ import datetime
 import logging
 import glob
 import sys
+import os
 
 
 def main() -> None:
@@ -27,7 +28,15 @@ def run(
 ) -> None:
     secrets = secrets or Secrets(_secrets_dir=config.secrets_dir)  # pyright: ignore
     logger = logging.getLogger("kube-dump-to-s3")
-    now = datetime.datetime.now().isoformat(timespec="seconds")
+    now = int(datetime.datetime.now().timestamp())
+
+    s3 = boto3.client(
+        "s3",
+        region_name=config.s3_region,
+        endpoint_url=config.s3_endpoint,
+        aws_access_key_id=secrets.s3_access_key,
+        aws_secret_access_key=secrets.s3_secret_key,
+    )
 
     with tempfile.TemporaryDirectory(
         prefix="kube-dump-",
@@ -35,50 +44,31 @@ def run(
     ) as tmpdir:
         logger.debug(f"Dumping to {tmpdir}")
 
+        kube_dump_out = os.path.join(tmpdir, "dump")
         kube_dump.run(
             dump=kube_dump.Dump.ALL if config.cluster else kube_dump.Dump.NAMESPACES,
             flags=kube_dump.Flags(
                 namespaces=",".join(config.namespaces) if config.namespaces else None,
                 kube_config=config.kubeconfig,
-                destination_dir=tmpdir,
+                destination_dir=kube_dump_out,
                 output_by_type=True,
-                archivate=True,
-                archive_type="tar",
                 silent=not config.debug,
             ),
         )
 
-        # kube-dump doesn't give deterministic filenames, so we'll have to
-        # search for one.
-        dumps = glob.glob(f"{tmpdir}/dump_*.tar", recursive=False)
-        assert len(dumps) == 1, dumps
+        logger.debug(f"Dumped to {kube_dump_out}")
 
-        dump_tarball = dumps[0]
-        logger.info(f"Dumped to {dump_tarball}")
+        tar_name = f"kube-dump-{now}.tar" + (".zst" if config.use_zstd else "")
+        tar_out = os.path.join(tmpdir, tar_name)
+        tar.run(kube_dump_out, tar_out, zstd=config.use_zstd)
 
-        if config.use_zstd:
-            zstd.run([dump_tarball])
-            dump_tarball += ".zst"
-            logger.info(f"Compressed to {dump_tarball}")
+        logger.debug(f"Tarballed to {tar_out}")
 
-        s3 = boto3.client(
-            "s3",
-            region_name=config.s3_region,
-            endpoint_url=config.s3_endpoint,
-            aws_access_key_id=secrets.s3_access_key,
-            aws_secret_access_key=secrets.s3_secret_key,
-        )
-
-        # Make the explicit decision to generate our own name instead of using
-        # what kube-dump generated. This way, we can be sure that the name is
-        # what we expect for future use.
-        s3_object_name = f"{now}.tar" + (".zst" if config.use_zstd else "")
-
-        s3_key = f"{config.s3_prefix}/{s3_object_name}"
+        s3_key = f"{config.s3_prefix}/{tar_name}"
         s3_uri = f"s3://{config.s3_bucket}/{s3_key}"
 
         logger.info(f"Uploading to {s3_uri}")
-        s3.upload_file(dump_tarball, config.s3_bucket, s3_key)
+        s3.upload_file(tar_out, config.s3_bucket, s3_key)
 
         if config.debug:
             logger.debug(f"Finished dumping to {tmpdir} but not deleting it.")

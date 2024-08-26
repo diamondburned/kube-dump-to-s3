@@ -2,7 +2,7 @@ import subprocess
 import logging
 import sys
 from enum import Enum
-from typing import Annotated, Literal
+from typing import Annotated
 from pydantic import BaseModel
 
 
@@ -21,10 +21,6 @@ class Flags(BaseModel):
     kube_context: str | None = None
     kube_cluster: str | None = None
     kube_insecure_tls: bool = False
-
-    archivate: bool = False
-    archive_type: Literal["xz", "gz", "bz2", "tar"] = "tar"
-    archive_rotate_days: int | None = None
 
 
 class Dump(Enum):

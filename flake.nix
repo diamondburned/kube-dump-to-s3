@@ -71,6 +71,7 @@
                 [
                   kube-dump
                   zstd
+                  gnutar
                 ];
 
               preFixup = ''
@@ -90,10 +91,6 @@
               curl
               jq
               yq-go
-              xz
-              gzip
-              bzip2
-              gnutar
             ];
 
             # kube-dump comes with its own bash options.
