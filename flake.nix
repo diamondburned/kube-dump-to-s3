@@ -84,6 +84,7 @@
             name = "kube-dump";
             text = builtins.readFile "${inputs.kube-dump}/kube-dump";
             runtimeInputs = with pkgs; [
+              coreutils
               kubectl
               curl
               jq
