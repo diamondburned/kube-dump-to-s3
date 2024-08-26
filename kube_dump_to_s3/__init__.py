@@ -6,7 +6,6 @@ import coloredlogs
 import tempfile
 import datetime
 import logging
-import glob
 import sys
 import os
 

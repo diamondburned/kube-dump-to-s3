@@ -21,4 +21,10 @@ def run(
     logger = logging.getLogger("tar")
     logger.debug(f"Running {' '.join(args)}")
 
-    subprocess.run(args, check=True, stderr=sys.stderr)
+    subprocess.run(
+        args,
+        check=True,
+        shell=False,
+        stdin=subprocess.DEVNULL,
+        stderr=sys.stderr,
+    )

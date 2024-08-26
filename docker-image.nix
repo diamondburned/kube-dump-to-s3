@@ -1,6 +1,7 @@
 {
   imageName,
   imageTag,
+  created ? null,
   system ? "x86_64-linux",
 }:
 
@@ -14,5 +15,12 @@ in
 pkgs.dockerTools.buildImage {
   name = imageName;
   tag = imageTag;
-  config.Entrypoint = [ "${lib.getExe self.packages.${system}.kube-dump-to-s3}" ];
+  inherit created;
+
+  copyToRoot = pkgs.buildEnv {
+    name = "kube-dump-to-s3-docker-env";
+    paths = [ pkgs.bash ] ++ (builtins.attrValues self.packages.${system});
+  };
+
+  config.Entrypoint = [ "/bin/kube-dump-to-s3" ];
 }

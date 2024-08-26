@@ -21,12 +21,11 @@ docker-build: $(DOCKER_BUILD_TARGET)
 
 .PHONY: docker-build-with-nix
 docker-build-with-nix:
-	nix build \
-		-f ./docker-image.nix \
-		--argstr imageName $(IMAGE_NAME) \
-		--argstr imageTag $(IMAGE_TAG)
-	docker load -i result
-	rm result
+	docker load -i \
+		$$(nix build --no-link --print-out-paths -f ./docker-image.nix \
+			--argstr imageName $(IMAGE_NAME) \
+			--argstr imageTag $(IMAGE_TAG) \
+			--argstr created now)
 
 .PHONY: docker-build-with-docker
 docker-build-with-docker:
